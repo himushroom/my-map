@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>行政区划边界</title>
+    </head>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #panel {
+            position: absolute;
+            background: #fff;
+            width: 350px;
+            padding: 20px;
+            z-index: 9999;
+            top: 30px;
+            left: 30px;
+        }
+    </style>
+
+    <body>
+        <div id="container"></div>
+        <input type="file" name="img" id="file" />
+    </body>
+    <script
+        charset="utf-8"
+        src="https://map.qq.com/api/gljs?v=1.exp&libraries=service&key=ZKABZ-5LQ6T-6ZUXK-VSA6O-SISF2-BGFSL"
+    ></script>
+    <script src="./dist/xlsx.full.min.js"></script>
+    <script src="./dist/FileSaver.js"></script>
+    <script src="./index.js"></script>
+</html>
