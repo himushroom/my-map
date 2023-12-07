@@ -28,17 +28,67 @@
             top: 30px;
             left: 30px;
         }
+        .box {
+            display: flex;
+        }
+        .wrap {
+            margin-left: 22px;
+        }
+
+        #legend {
+            display: flex;
+            flex-wrap: wrap;
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            max-width: 420px;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        #legend > div {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        #legend img {
+            flex: 0 0 auto;
+            width: 8px;
+            height: 8px;
+            margin-right: 2px;
+            border-radius: 50%;
+        }
+        #legend span {
+            font-size: 14px;
+        }
     </style>
 
     <body>
         <div id="container"></div>
-        <input type="file" name="img" id="file" />
+        <div class="box">
+            <input type="file" name="img" id="file" />
+            <div class="wrap">
+                地图数据切换(需先在左侧上传文件)：<button id="changeButton">
+                    点击切换</button
+                ><span id="label"></span>
+            </div>
+            <div class="wrap">
+                在地图上框选三亚区域：<button id="selectButton">
+                    点击框选/取消</button
+                ><span id="label"></span>
+            </div>
+        </div>
+        <div id="legend"></div>
+        <div>板块数据：</div>
+        <div id="echartMap" style="width: 800px; height: 600px"></div>
     </body>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <script
         charset="utf-8"
         src="https://map.qq.com/api/gljs?v=1.exp&libraries=service&key=ZKABZ-5LQ6T-6ZUXK-VSA6O-SISF2-BGFSL"
     ></script>
+    <script src="./dist/echarts.js"></script>
     <script src="./dist/xlsx.full.min.js"></script>
     <script src="./dist/FileSaver.js"></script>
+    <script src="./transferLocation.js"></script>
     <script src="./index.js"></script>
 </html>

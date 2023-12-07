@@ -11,10 +11,17 @@ var polygons = new TMap.MultiPolygon({
     map: map,
     geometries: []
 });
-function findBorder() {
+
+//绑定点击事件
+map.on("click",function(evt){
+    var lat = evt.latLng.getLat().toFixed(6);
+    var lng = evt.latLng.getLng().toFixed(6);
+    console.log(lat + ', ' + lng)
+})
+function findBorder(keyword) {
     polygons.remove(polygons.getGeometries().map((item) => item.id));
     district
-        .search({ keyword: "460203" })
+        .search({ keyword })
         .then((result) => {
             // 搜索行政区划信息
             result.result.forEach((level) => {
@@ -36,7 +43,7 @@ function findBorder() {
                         ]);
                     }); // 若一行政区有多个多边形边界，应计算能包含所有多边形边界的范围。
                     polygons.updateGeometries(newGeometries);
-                    map.fitBounds(bounds);
+                    // map.fitBounds(bounds);
                 });
             });
         })
@@ -64,10 +71,23 @@ function fitBounds(latLngList) {
         new TMap.LatLng(boundsN, boundsE)
     );
 }
-// findBorder();
+
+const selectButton = document.getElementById("selectButton");
+let flag = false;
+selectButton.onclick = () => {
+    if (!flag) {
+        ["460203", "460204", "460202", "460205"].map((v) => {
+            findBorder(v);
+        });
+        flag = true;
+    } else {
+        polygons.remove(polygons.getGeometries().map((item) => item.id));
+        flag = false;
+    }
+};
 
 // 文件
-var geocoder = new TMap.service.Geocoder(); // 新建一个正逆地址解析类
+// var geocoder = new TMap.service.Geocoder(); // 新建一个正逆地址解析类
 var markers = new TMap.MultiMarker({
     map: map,
     geometries: []
@@ -83,6 +103,15 @@ const waitTime = (time) => {
     });
 };
 
+let ws1;
+let ws2;
+let ws3;
+let ws4;
+let sheet1;
+let sheet2;
+let sheet3;
+let sheet4;
+let marker = null;
 function readExcel(e) {
     markers.setGeometries([]);
     const files = e.target.files;
@@ -102,170 +131,27 @@ function readExcel(e) {
                 type: "binary"
             });
             console.log(workbook);
-            const wsname1 = workbook.SheetNames[0];
-            const wsname2 = workbook.SheetNames[1];
-            const wsname3 = workbook.SheetNames[2];
-            const ws1 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname1]);
-            const ws2 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname2]);
-            const ws3 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname3]);
-            const sheet1 = workbook.Sheets[wsname1];
-            const sheet2 = workbook.Sheets[wsname2];
-            const sheet3 = workbook.Sheets[wsname3];
+            wsname1 = workbook.SheetNames[0];
+            wsname2 = workbook.SheetNames[1];
+            wsname3 = workbook.SheetNames[2];
+            wsname4 = workbook.SheetNames[3];
+            ws1 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname1]);
+            ws2 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname2]);
+            ws3 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname3]);
+            ws4 = XLSX.utils.sheet_to_json(workbook.Sheets[wsname4]);
+            sheet1 = workbook.Sheets[wsname1];
+            sheet2 = workbook.Sheets[wsname2];
+            sheet3 = workbook.Sheets[wsname3];
+            sheet4 = workbook.Sheets[wsname4];
 
-            // let output = document.getElementById("output")
             console.log(ws1);
             console.log(ws2);
             console.log(ws3);
-            const mapData = {};
-            ws1.map(v => {
-                const loc = v['经纬度']
-                if (loc && !loc.includes('-')) {
-                    const dot = loc.split(', ')
-                    const type = v['类型']
-                    const color = ws3.find(w => w['类型'] === type)?.['颜色']
-
-                    if (color) {
-                        if (mapData[color]?.length) {
-                            mapData[color].push(dot)
-                        } else {
-                            mapData[color] = [dot]
-                        }
-                    }
-                }
-            })
-            console.log(mapData)
-            for (const key in mapData) {
-                if (Object.hasOwnProperty.call(mapData, key)) {
-                    const dotes = mapData[key];
-                    var marker = new TMap.MultiMarker({
-                            map: map,
-                            styles: {
-                                // 点标记样式
-                                marker: new TMap.MarkerStyle({
-                                    width: 12, // 样式宽
-                                    height: 12, // 样式高
-                                    anchor: { x: 6, y: 6 }, // 描点位置
-                                    src: './icon/' + encodeURIComponent(key) + '.png'
-                                })
-                            },
-                            geometries: dotes.map(v => {
-                                return {
-                                    // 标记位置(纬度，经度，高度)
-                                    position: new TMap.LatLng(v[0], v[1]),
-                                    "styleId": 'marker',
-                                    id: "marker"
-                                }
-                            })
-                        });
-                }
-            }
+            console.log(ws4);
             
-            // const promise = new Promise((resolve) => {
-            //     const len = ws1.length;
-                // sheet1["P1"].v = "经纬度";
-                // const m = new Map();
-
-                // function digui(num){
-                //     if (num >= ws1.length) {
-                //         console.log('导出')
-                //         resolve()
-                //         return
-                //     }
-                //     const v = ws1[num]
-
-                //     const address = v["营业地址"];
-                //     const location = v["经纬度"];
-                //     if (!address) {
-                //         sheet1[`P${num + 2}`].v = "";
-                //         digui(num+1)
-                //     } else if (location && !location.includes("-")) {
-                //         m.set(address, location);
-                //         digui(num+1)
-                //     } else if (m.get(address)) {
-                //         sheet1[`P${num + 2}`].v = m.get(address);
-                //         digui(num+1)
-                //     } else {
-                //         geocoder
-                //             .getLocation({ address: address })
-                //             .then(async (result) => {
-                //                 await waitTime(200)
-                //                 console.log(address);
-                //                 console.log(result);
-                //                 // 
-
-                //                 sheet1[`P${num + 2}`].v =
-                //                     result.result.location.toString();
-                //                 digui(num+1)
-                //             })
-                //             .catch(() => {
-                //                 digui(num+1)
-                //             });
-                //     }
-                // }
-                // digui(0)
-            // });
-            // promise.then(() => {
-                // console.log(location);
-                // var marker = new TMap.MultiMarker({
-                //     map: map,
-                //     styles: {
-                //         // 点标记样式
-                //         marker: new TMap.MarkerStyle({
-                //             width: 12, // 样式宽
-                //             height: 12, // 样式高
-                //             anchor: { x: 10, y: 30 } // 描点位置
-                //         })
-                //     },
-                //     geometries: location.map(v => {
-                //         // 点标记数据数组
-                //         return {
-                //             // 标记位置(纬度，经度，高度)
-                //             position: new TMap.LatLng(v[0], v[1]),
-                //             id: "marker"
-                //         }
-                //     })
-                // });
-                // var markerCluster = new TMap.MarkerCluster({
-                //     id: 'cluster', //图层id
-                //     map: map,       //设置点聚合显示在哪个map对象中（创建map的段落省略）
-                //     minimumClusterSize: 2,  //最小聚合点数：2个
-                //     // styles: {
-                //     //     default: new TMap.MarkerStyle({
-                //     //       'width': 34,
-                //     //       'height': 42,
-                //     //       'anchor': {
-                //     //         x: 17,
-                //     //         y: 21,
-                //     //       },
-                //     //       'src': 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/marker_blue.png',
-                //     //     }),
-                //     //   },
-                //     geometries: location.map(v => {
-                //         return {position: new TMap.LatLng(v[0], v[1])}
-                //     }),
-                //     zoomOnClick: true,  //点击聚合数字放大展开
-                //     gridSize: 60,       //聚合算法的可聚合距离，即距离小于该值的点会聚合至一起，默认为60，以像素为单位
-                //     averageCenter: false, //每个聚和簇的中心是否应该是聚类中所有标记的平均值
-                //     maxZoom: 16 //采用聚合策略的最大缩放级别，若地图缩放级别大于该值，则不进行聚合，标点将全部被展开
-                // });
-                // var wbout = XLSX.write(workbook, {
-                //     bookType: "xlsx",
-                //     type: "binary"
-                // });
-                // function s2ab(s) {
-                //     var buf = new ArrayBuffer(s.length);
-                //     var view = new Uint8Array(buf);
-                //     for (var i = 0; i < s.length; i++)
-                //         view[i] = s.charCodeAt(i) & 0xff;
-                //     return buf;
-                // }
-                // saveAs(
-                //     new Blob([s2ab(wbout)], {
-                //         type: "application/octet-stream"
-                //     }),
-                //     "output.xlsx"
-                // );
-            // });
+            addAddressMarker('类型', ws3)
+            initEchart()
+            // transferExport(workbook, ws1, sheet1)
         } catch (e) {
             console.log(e);
         }
@@ -276,3 +162,384 @@ function readExcel(e) {
 dom.addEventListener("change", (e) => {
     readExcel(e);
 });
+
+const legend = document.getElementById('legend')
+const changeButton = document.getElementById("changeButton");
+
+let isChange = false;
+changeButton.onclick = () => {
+    if (!ws1) return
+    legend.innerHTML = ''
+    console.log(isChange)
+    if (!isChange) {
+        isChange = true
+        addAddressMarker('网点规模', ws4)
+    } else {
+        addAddressMarker('类型', ws3)
+        isChange = false
+    }
+};
+
+function addAddressMarker(keyName, ws){
+    const mapData = {};
+    ws1.map((v) => {
+        const loc = v["经纬度"];
+        if (loc && !loc.includes("-")) {
+            const dot = loc.split(", ");
+            const type = v[keyName];
+            const color = ws.find((w) => w[keyName] === type)?.["颜色"];
+            if (color) {
+                if(!mapData[color]?.type){
+                    mapData[color] = {}
+                }
+                mapData[color].type = type;
+                if (mapData[color]?.loc?.length) {
+                    mapData[color].loc.push(dot);
+                } else {
+                    mapData[color].loc = [dot];
+                }
+            }
+        }
+    });
+    console.log(mapData);
+    // 根据颜色生成点数据
+    if (marker != null) {
+        marker.setMap(null);
+        marker = null;
+    }
+
+    for (const key in mapData) {
+        if (Object.hasOwnProperty.call(mapData, key)) {
+            const dotes = mapData[key].loc;
+            const type = mapData[key].type;
+            marker = new TMap.MultiMarker({
+                map: map,
+                styles: {
+                    // 点标记样式
+                    marker: new TMap.MarkerStyle({
+                        width: 12, // 样式宽
+                        height: 12, // 样式高
+                        anchor: { x: 6, y: 6 }, // 描点位置
+                        src:
+                            "./icon/" + encodeURIComponent(key) + ".png"
+                    })
+                },
+                geometries: dotes
+                    .filter((v) => v[0] && v[1])
+                    .map((v) => {
+                        return {
+                            // 标记位置(纬度，经度，高度)
+                            position: new TMap.LatLng(v[0], v[1]),
+                            styleId: "marker",
+                        };
+                    })
+            });
+            // style="color: ${key}"
+            legend.innerHTML += `<div><img src="./icon/${encodeURIComponent(key)}.png" /><span>${type}</span></div>`
+        }
+    }
+    marker.setMap(map);
+}
+
+// echart
+function initEchart(){
+    var myChart = echarts.init(document.getElementById('echartMap'));
+    var uploadedDataURL = "./dist/sanya.json";
+    var geoCoordMap = {};
+    var customerBatteryCityData = []
+    ws2.map(v => {
+        geoCoordMap[v['区域']] = v['中心坐标'].split(", ")
+        customerBatteryCityData.push({
+            name: v['区域'],
+            value: v['区域 (计数)']
+        })
+    })
+    console.log(geoCoordMap)
+    console.log(customerBatteryCityData)
+    console.log($.getJSON)
+    $.getJSON(uploadedDataURL, function(geoJson) {
+        console.log(geoJson)
+        echarts.registerMap('sanya', geoJson);
+        option = {
+            backgroundColor: '#fff',
+            geo: [
+              {
+                map: 'sanya',
+                aspectScale: 0.9,
+                roam: false, // 是否允许缩放
+                zoom: 1.2, // 默认显示级别
+                layoutSize: '95%',
+                layoutCenter: ['55%', '50%'],
+                itemStyle: {
+                  normal: {
+                    areaColor: {
+                      type: 'linear-gradient',
+                      x: 0,
+                      y: 400,
+                      x2: 0,
+                      y2: 0,
+                      colorStops: [{
+                        offset: 0,
+                        color: 'rgba(37,108,190,0.3)' // 0% 处的颜色
+                      }, {
+                        offset: 1,
+                        color: 'rgba(15,169,195,0.3)' // 50% 处的颜色
+                      }],
+                      global: true // 缺省为 false
+                    },
+                    borderColor: '#4ecee6',
+                    borderWidth: 1
+                  },
+                  emphasis: {
+                    areaColor: {
+                      type: 'linear-gradient',
+                      x: 0,
+                      y: 300,
+                      x2: 0,
+                      y2: 0,
+                      colorStops: [{
+                        offset: 0,
+                        color: 'rgba(37,108,190,1)' // 0% 处的颜色
+                      }, {
+                        offset: 1,
+                        color: 'rgba(15,169,195,1)' // 50% 处的颜色
+                      }],
+                      global: true // 缺省为 false
+                    }
+                  }
+                },
+                emphasis: {
+                  itemStyle: {
+                    areaColor: '#0160AD'
+                  },
+                  label: {
+                    show: 0,
+                    color: '#fff'
+                  }
+                },
+                zlevel: 3
+              },
+              {
+                map: 'sanya',
+                aspectScale: 0.9,
+                roam: false, // 是否允许缩放
+                zoom: 1.2, // 默认显示级别
+                layoutSize: '95%',
+                layoutCenter: ['55%', '50%'],
+                itemStyle: {
+                  normal: {
+                    borderColor: 'rgba(192,245,249,.6)',
+                    borderWidth: 2,
+                    shadowColor: '#2C99F6',
+                    shadowOffsetY: 0,
+                    shadowBlur: 120,
+                    areaColor: 'rgba(29,85,139,.2)'
+                  }
+                },
+                zlevel: 2,
+                silent: true
+              },
+              {
+                map: 'sanya',
+                aspectScale: 0.9,
+                roam: false, // 是否允许缩放
+                zoom: 1.2, // 默认显示级别
+                layoutSize: '95%',
+                layoutCenter: ['55%', '51.5%'],
+                itemStyle: {
+                  // areaColor: '#005DDC',
+                  areaColor: 'rgba(0,27,95,0.4)',
+                  borderColor: '#004db5',
+                  borderWidth: 1
+                },
+                zlevel: 1,
+                silent: true
+              }
+            ],
+            series: [
+              // map
+              {
+                geoIndex: 0,
+                // coordinateSystem: 'geo',
+                showLegendSymbol: true,
+                type: 'map',
+                roam: true,
+                label: {
+                  normal: {
+                    show: false,
+                    textStyle: {
+                      color: '#fff'
+                    }
+                  },
+                  emphasis: {
+                    show: false,
+                    textStyle: {
+                      color: '#fff'
+                    }
+                  }
+                },
+    
+                itemStyle: {
+                  normal: {
+                    borderColor: '#2ab8ff',
+                    borderWidth: 1.5,
+                    areaColor: '#12235c'
+                  },
+                  emphasis: {
+                    areaColor: '#2AB8FF',
+                    borderWidth: 0,
+                    color: 'red'
+                  }
+                },
+                map: 'sanya', // 使用
+                data: customerBatteryCityData
+                // data: this.difficultData //热力图数据   不同区域 不同的底色
+              },
+              // 柱状体的主干
+              {
+                type: 'lines',
+                zlevel: 5,
+                effect: {
+                  show: false,
+                  // period: 4, //箭头指向速度，值越小速度越快
+                  // trailLength: 0.02, //特效尾迹长度[0,1]值越大，尾迹越长重
+                  // symbol: 'arrow', //箭头图标
+                  // symbol: imgDatUrl,
+                  symbolSize: 5 // 图标大小
+                },
+                lineStyle: {
+                  width: 20, // 尾迹线条宽度
+                  color: 'rgb(22,255,255, .6)',
+                  opacity: 1, // 尾迹线条透明度
+                  curveness: 0 // 尾迹线条曲直度
+                },
+                label: {
+                  show: 0,
+                  position: 'end',
+                  formatter: '245'
+                },
+                silent: true,
+                data: lineData()
+              },
+              // 柱状体的顶部
+              {
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                geoIndex: 0,
+                zlevel: 5,
+                label: {
+                  show: true,
+                  formatter: function () {
+                    return `顶部label`
+                  },
+                  position: "top"
+                },
+                symbol: 'circle',
+                symbolSize: [20, 10],
+                itemStyle: {
+                  color: 'rgb(22,255,255, 1)',
+                  opacity: 1
+                },
+                silent: true,
+                data: scatterData()
+              },
+              // 柱状体的底部
+              {
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                geoIndex: 0,
+                zlevel: 4,
+                label: {
+                  // 这儿是处理的
+                  formatter: '{b}',
+                  position: 'bottom',
+                  color: '#fff',
+                  fontSize: 12,
+                  distance: 10,
+                  show: true
+                },
+                symbol: 'circle',
+                symbolSize: [20, 10],
+                itemStyle: {
+                  // color: '#F7AF21',
+                  color: 'rgb(22,255,255, 1)',
+                  opacity: 1
+                },
+                silent: true,
+                data: scatterData2()
+              },
+              // 底部外框
+              {
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                geoIndex: 0,
+                zlevel: 4,
+                label: {
+                  show: false
+                },
+                symbol: 'circle',
+                symbolSize: [40, 20],
+                itemStyle: {
+                    color: {
+                    type: 'radial',
+                    x: 0.5,
+                    y: 0.5,
+                    r: 0.5,
+                    colorStops: [
+                        {
+                            offset: 0, color: 'rgb(22,255,255, 0)' // 0% 处的颜色
+                        }, 
+                        {
+                            offset: .75, color: 'rgb(22,255,255, 0)' // 100% 处的颜色
+                        },
+                        {
+                            offset: .751, color: 'rgb(22,255,255, 1)' // 100% 处的颜色
+                        },
+                        {
+                            offset: 1, color: 'rgb(22,255,255, 1)' // 100% 处的颜色
+                        }
+                    ],
+                    global: false // 缺省为 false
+                },
+    
+                  opacity: 1
+                },
+                silent: true,
+                data: scatterData2()
+              }
+            ]
+          }
+       myChart.setOption(option);
+    })
+    
+      
+    // 动态计算柱形图的高度（定一个max）
+    function lineMaxHeight () {
+        const maxValue = Math.max(...customerBatteryCityData.map(item => item.value))
+        return 0.9/maxValue
+    }
+        // 柱状体的主干
+    function lineData () {
+        return customerBatteryCityData.map((item) => {
+          return {
+            coords: [geoCoordMap[item.name], [geoCoordMap[item.name][0], geoCoordMap[item.name][1] + item.value * lineMaxHeight()]]
+          }
+        })
+    }
+    // 柱状体的顶部
+    function scatterData () {
+        return customerBatteryCityData.map((item) => {
+          return [geoCoordMap[item.name][0], geoCoordMap[item.name][1] + item.value * lineMaxHeight()]
+        })
+    }
+    // 柱状体的底部
+    function scatterData2 () {
+        return customerBatteryCityData.map((item) => {
+          return {
+            name: item.name,
+            value: geoCoordMap[item.name]
+          }
+        })
+    }
+}
+
