@@ -353,7 +353,7 @@ window.onload = () => {
             .filter((v) => !street || v["街道"] === street);
         filterData.map((v) => {
             const loc = v["经纬度"];
-            if (loc && !loc.includes("-")) {
+            if (loc && loc.includes(',') && !loc.includes("-")) {
                 const dot = loc.split(", ");
                 const type = v[keyName];
                 const color = ws.find((w) => w[keyName] === type)?.["颜色"];
