@@ -10,39 +10,50 @@
         html,
         body {
             height: 100%;
-            margin: 0px;
-            padding: 0px;
+            margin: 0;
+            padding: 0;
         }
 
         #container {
             width: 100%;
             height: 100%;
-        }
-
-        #panel {
-            position: absolute;
-            background: #fff;
-            width: 350px;
-            padding: 20px;
-            z-index: 9999;
-            top: 30px;
-            left: 30px;
+            margin-bottom: 12px;
         }
         .box {
             display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-top: 12px;
+        }
+        .box.bt {
+            padding-bottom: 40px;
         }
         .wrap {
-            margin-left: 22px;
+            display: flex;
+            align-items: flex-start;
+            margin-right: 22px;
         }
 
-        #legend {
-            display: flex;
-            flex-wrap: wrap;
+        .wrap > * {
+            margin-right: 6px;
+        }
+
+        .float {
             position: absolute;
             bottom: 12px;
             right: 12px;
+            z-index: 10000;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        #legend {
+            display: flex;
+            flex-wrap: wrap;
             max-width: 420px;
             background-color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
         }
 
         #legend > div {
@@ -63,17 +74,36 @@
         #area {
             margin-left: 12px;
         }
+        .name {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 4px;
+            font-size: 12px;
+            padding: 2px 6px;
+            margin-right: 12px;
+        }
+        #select,
+        #selectStreet,
+        #selectArea {
+            width: 160px;
+        }
     </style>
 
     <body>
         <div id="container"></div>
+        <input type="file" name="img" id="file" />
         <div class="box">
-            <input type="file" name="img" id="file" />
             <div class="wrap">
                 地图数据切换(需先在左侧上传文件)：<button id="changeButton">
-                    点击切换</button
-                ><span id="label"></span>
+                    切换（类型/规模）</button
+                ><span>类型</span
+                ><select name="type" id="select"></select
+                ><span>网点规模</span
+                ><select name="type" id="selectArea"></select
+                ><span>街道</span
+                ><select name="type" id="selectStreet"></select>
             </div>
+        </div>
+        <div class="box bt">
             <div class="wrap">
                 在地图上框选三亚区域：<button id="selectButton">
                     点击框选/取消</button
@@ -81,7 +111,10 @@
             </div>
             <div id="area"></div>
         </div>
-        <div id="legend"></div>
+        <div class="float">
+            <div id="legend"></div>
+            <div class="show"></div>
+        </div>
         <div id="adText"></div>
         <!-- <div>板块数据：</div> -->
         <!-- <div id="echartMap" style="width: 800px; height: 600px"></div> -->

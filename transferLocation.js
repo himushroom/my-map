@@ -76,3 +76,11 @@ function transferExport(workbook, ws1, sheet1){
         );
     })
 }
+
+const waitTime = (time) => {
+    return new Promise((r) => {
+        setTimeout(() => {
+            r();
+        }, time);
+    });
+};
