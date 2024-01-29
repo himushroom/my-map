@@ -354,18 +354,23 @@ window.onload = () => {
         filterData.map((v) => {
             const loc = v["经纬度"];
             if (loc && loc.includes(',') && !loc.includes("-")) {
-                const dot = loc.split(", ");
+                const dot = loc.includes(', ') ? loc.split(", ") : loc.split(",");
                 const type = v[keyName];
                 const color = ws.find((w) => w[keyName] === type)?.["颜色"];
                 if (color) {
-                    if (!mapData[color]?.loc?.length) {
-                        mapData[color] = {
-                            loc: [],
-                            address: v["店名"] + "-" + v["营业地址"]
-                        };
+                    if (!mapData[color]?.length) {
+                        mapData[color] = [];
                     }
 
-                    mapData[color].loc.push(dot);
+                    mapData[color].push({
+                        loc: dot,
+                        address: v["店名"] + "-" + v["营业地址"],
+                        area: v["区域"],
+                        stretch: v["街道"],
+                        gm: v["网点规模"],
+                        type: v["类型"],
+                        id: v["ID"],
+                    });
                 }
             }
         });
@@ -373,7 +378,6 @@ window.onload = () => {
         // 根据颜色生成点数据
         for (const key in mapData) {
             if (Object.hasOwnProperty.call(mapData, key)) {
-                const dotes = mapData[key].loc;
                 const current = new TMap.MultiMarker({
                     id: "marker" + key,
                     map: map,
@@ -386,19 +390,20 @@ window.onload = () => {
                             src: "./icon/" + encodeURIComponent(key) + ".png"
                         })
                     },
-                    geometries: dotes
-                        .filter((v) => v[0] && v[1])
+                    geometries: mapData[key]
+                        .filter((v) => v.loc[0] && v.loc[1])
                         .map((v) => {
                             return {
                                 // 标记位置(纬度，经度，高度)
-                                position: new TMap.LatLng(v[0], v[1]),
-                                styleId: "marker"
+                                position: new TMap.LatLng(v.loc[0], v.loc[1]),
+                                styleId: "marker",
+                                text: v.loc.toString() + ' ' + v.address + ' ' + v.id + ' ' + v.area + ' ' + v.stretch + ' ' + v.gm + ' ' + v.type
                             };
                         })
                 });
                 current.on("click", (evt) => {
                     console.log(evt);
-                    adText.innerHTML = mapData[key].address;
+                    adText.innerHTML = evt.geometry?.text ?? '-';
                 });
                 marker.push(current);
             }

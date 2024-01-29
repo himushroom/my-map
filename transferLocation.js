@@ -39,9 +39,6 @@ function transferExport(workbook, ws1, sheet1){
                     .getLocation({ address: address + shopName })
                     .then(async (result) => {
                         await waitTime(200)
-                        console.log(address);
-                        console.log(result);
-    
                         sheet1[`P${num + 2}`].v =
                             result.result.location.toString();
                         digui(num+1, r)
