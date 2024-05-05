@@ -340,7 +340,7 @@ window.onload = () => {
         }
 
         ws.map((v) => {
-            legend.innerHTML += `<div><img src="./icon/${v["颜色"]}.png" /><span>${v[keyName]}</span></div>`;
+            legend.innerHTML += `<div><img src="./icon/${v["命名"]}.png" /><span>${v[keyName]}</span></div>`;
         });
 
         const mapData = {};
@@ -354,7 +354,7 @@ window.onload = () => {
             if (loc && loc.includes(',') && !loc.includes("-")) {
                 const dot = loc.includes(', ') ? loc.split(", ") : loc.split(",");
                 const type = v[keyName];
-                const color = ws.find((w) => w[keyName] === type)?.["颜色"];
+                const color = ws.find((w) => w[keyName] === type)?.["命名"];
                 if (color) {
                     if (!mapData[color]?.length) {
                         mapData[color] = [];
