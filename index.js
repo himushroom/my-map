@@ -124,7 +124,7 @@ window.onload = () => {
     let marker = [];
 
     function readExcel(e) {
-        markers.setGeometries([]);
+        // markers.setGeometries([]);
         const files = e.target.files;
         console.log(files);
         if (files.length <= 0) {
