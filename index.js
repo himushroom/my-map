@@ -397,7 +397,7 @@ window.onload = () => {
                                 // 标记位置(纬度，经度，高度)
                                 position: new TMap.LatLng(v.loc[0], v.loc[1]),
                                 styleId: "marker",
-                                text: v.loc.toString() + ' ' + v.address + ' ' + v.id + ' ' + v.area + ' ' + v.stretch + ' ' + v.gm + ' ' + v.type
+                                text: v.id + ' ' + v.loc.toString() + ' ' + v.address + ' ' + v.area + ' ' + v.stretch + ' ' + v.gm + ' ' + v.type
                             };
                         })
                 });
