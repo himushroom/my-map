@@ -340,9 +340,7 @@ window.onload = () => {
         }
 
         ws.map((v) => {
-            legend.innerHTML += `<div><img src="./icon/${encodeURIComponent(
-                v["颜色"]
-            )}.png" /><span>${v[keyName]}</span></div>`;
+            legend.innerHTML += `<div><img src="./icon/${v["颜色"]}.png" /><span>${v[keyName]}</span></div>`;
         });
 
         const mapData = {};
